@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wynik oceny — OC Weryfikator</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:     #0A0A0B;
+  --ink2:    #111114;
+  --ink3:    #18181C;
+  --ink4:    #1E1E23;
+  --gold:    #C9A84C;
+  --gold2:   #E2C07A;
+  --gold3:   #F5E4B8;
+  --cream:   #FAF7F2;
+  --smoke:   #F0EDE8;
+  --mist:    #9C9890;
+  --ash:     #5C5955;
+  --border:  rgba(201,168,76,0.18);
+  --border2: rgba(201,168,76,0.08);
+  --result-color:      #C9A84C;
+  --result-color-dim:  rgba(201,168,76,0.08);
+  --result-border:     rgba(201,168,76,0.22);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--ink); color: var(--cream);
+  line-height: 1.7; font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden; min-height: 100vh;
+}
+
+body::before {
+  content: ''; position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.028; pointer-events: none; z-index: 9999;
+}
+
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  padding: 1.3rem 3rem;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(10,10,11,0.88);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border2);
+}
+
+.logo {
+  font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 600;
+  color: var(--gold2); letter-spacing: 0.04em; text-transform: uppercase; text-decoration: none;
+}
+.logo sup {
+  font-family: 'Outfit', sans-serif; font-size: 0.5rem; font-weight: 400;
+  color: var(--mist); letter-spacing: 0.12em; vertical-align: super; margin-left: 2px;
+}
+
+.nav-back {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.8rem; font-weight: 400; letter-spacing: 0.08em;
+  color: var(--ash); text-decoration: none; transition: color 0.2s;
+}
+.nav-back:hover { color: var(--mist); }
+.nav-back svg { transition: transform 0.2s; }
+.nav-back:hover svg { transform: translateX(-3px); }
+
+/* ── HERO RESULT ── */
+.hero-result {
+  padding: 9rem 2rem 5rem; text-align: center; position: relative; overflow: hidden;
+}
+.hero-orb {
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 700px; height: 500px;
+  background: radial-gradient(ellipse at 50% 0%, var(--result-color-dim) 0%, rgba(201,168,76,0.02) 55%, transparent 80%);
+  pointer-events: none;
+}
+.hero-line {
+  position: absolute; top: 0; left: 50%; width: 1px; height: 80px;
+  background: linear-gradient(to bottom, transparent, var(--result-color));
+  opacity: 0.35;
+}
+
+.score-ring-wrap { display: flex; justify-content: center; margin-bottom: 2rem; animation: fadeUp 0.8s cubic-bezier(.22,.68,0,1.2) 0.1s both; }
+.score-ring {
+  width: 96px; height: 96px; border-radius: 50%;
+  border: 1px solid var(--result-border); background: var(--result-color-dim);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  position: relative;
+}
+.score-ring::before {
+  content: ''; position: absolute; inset: 6px; border-radius: 50%;
+  border: 1px solid var(--result-border); opacity: 0.4;
+}
+.score-num { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: var(--result-color); line-height: 1; }
+.score-label { font-size: 0.6rem; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--mist); margin-top: 2px; }
+
+.result-pill {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--result-color-dim); border: 1px solid var(--result-border);
+  padding: 0.42rem 1.1rem; border-radius: 2px;
+  font-size: 0.72rem; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--result-color); margin-bottom: 2rem;
+  animation: fadeIn 0.8s ease 0.05s both;
+}
+.result-pill-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--result-color); }
+
+h1.result-headline {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.65rem, 4vw, 2.8rem); font-weight: 700; color: var(--cream);
+  line-height: 1.15; letter-spacing: -0.01em; max-width: 720px; margin: 0 auto 1.2rem;
+  animation: fadeUp 0.8s cubic-bezier(.22,.68,0,1.2) 0.15s both;
+}
+h1.result-headline em { font-style: italic; color: var(--result-color); }
+
+.result-desc {
+  font-size: 1rem; color: var(--mist); font-weight: 300; max-width: 560px;
+  margin: 0 auto 1rem; line-height: 1.8;
+  animation: fadeUp 0.8s cubic-bezier(.22,.68,0,1.2) 0.25s both;
+}
+
+.data-strip {
+  display: inline-flex; align-items: stretch; gap: 0;
+  border: 1px solid var(--border2); background: var(--ink2); overflow: hidden;
+  animation: fadeUp 0.8s cubic-bezier(.22,.68,0,1.2) 0.35s both;
+}
+.data-cell { padding: 0.9rem 1.8rem; text-align: center; border-right: 1px solid var(--border2); min-width: 130px; }
+.data-cell:last-child { border-right: none; }
+.data-cell-label { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ash); margin-bottom: 0.3rem; }
+.data-cell-val { font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 600; color: var(--cream); }
+.data-cell-val.accent { color: var(--result-color); }
+
+section { padding: 5rem 2rem; }
+.container { max-width: 760px; margin: 0 auto; }
+.container-sm { max-width: 640px; margin: 0 auto; }
+
+.section-pre {
+  font-size: 0.7rem; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 1.2rem; display: flex; align-items: center; gap: 12px;
+}
+.section-pre::before { content: ''; display: block; width: 24px; height: 1px; background: var(--gold); opacity: 0.6; }
+
+section h2 {
+  font-family: 'Playfair Display', serif; font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+  font-weight: 600; color: var(--cream); line-height: 1.2; letter-spacing: -0.01em; margin-bottom: 0.8rem;
+}
+
+.section-lead { font-size: 0.97rem; color: var(--mist); font-weight: 300; line-height: 1.75; margin-bottom: 2.8rem; }
+
+.reasons-section { background: var(--ink); }
+.reasons-list { display: flex; flex-direction: column; gap: 1px; background: var(--border2); border: 1px solid var(--border2); }
+.reason-item {
+  background: var(--ink); padding: 1.5rem 1.8rem;
+  display: flex; align-items: flex-start; gap: 1.1rem; transition: background 0.25s;
+}
+.reason-item:hover { background: var(--ink2); }
+.reason-icon {
+  flex-shrink: 0; margin-top: 2px; width: 20px; height: 20px;
+  border: 1px solid var(--result-border); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--result-color-dim);
+}
+.reason-text { font-size: 0.97rem; color: var(--smoke); font-weight: 300; line-height: 1.65; }
+.reason-item.neutral .reason-icon { border-color: rgba(92,89,85,0.35); background: rgba(92,89,85,0.06); }
+.reason-item.neutral .reason-text { color: var(--ash); }
+
+.cta-section { background: var(--ink2); }
+.cta-box { border: 1px solid var(--border2); background: var(--ink3); position: relative; overflow: hidden; }
+.cta-box::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(to right, transparent, var(--gold) 50%, transparent); opacity: 0.4;
+}
+.cta-box-inner { padding: 3rem; display: grid; grid-template-columns: 1fr auto; gap: 2.5rem; align-items: center; }
+.cta-box h3 { font-family: 'Playfair Display', serif; font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 600; color: var(--cream); line-height: 1.2; margin-bottom: 0.8rem; }
+.cta-box p { font-size: 0.95rem; color: var(--mist); font-weight: 300; line-height: 1.7; margin-bottom: 1.5rem; }
+.cta-benefits { display: flex; flex-direction: column; gap: 0.55rem; margin-bottom: 2rem; }
+.cta-benefit { display: flex; align-items: center; gap: 10px; font-size: 0.88rem; color: var(--smoke); font-weight: 300; }
+.cta-benefit-dot { flex-shrink: 0; width: 5px; height: 5px; border-radius: 50%; background: var(--gold); opacity: 0.65; }
+
+.btn-gold {
+  display: inline-flex; align-items: center; gap: 12px; padding: 1.1rem 2.4rem;
+  background: linear-gradient(135deg, var(--gold) 0%, #B8923A 100%);
+  color: var(--ink); border: none; border-radius: 2px;
+  font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none;
+  cursor: pointer; position: relative; overflow: hidden;
+  transition: transform 0.22s cubic-bezier(.22,.68,0,1.2), box-shadow 0.22s; white-space: nowrap;
+}
+.btn-gold::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--gold2) 0%, var(--gold) 100%);
+  opacity: 0; transition: opacity 0.25s;
+}
+.btn-gold:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(201,168,76,0.26); }
+.btn-gold:hover::before { opacity: 1; }
+.btn-gold span, .btn-arrow { position: relative; }
+.btn-arrow { transition: transform 0.22s; }
+.btn-gold:hover .btn-arrow { transform: translateX(4px); }
+.btn-price { display: block; font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; color: var(--ink); position: relative; }
+
+.btn-ghost {
+  display: inline-flex; align-items: center; gap: 10px; padding: 0.85rem 1.8rem;
+  background: transparent; border: 1px solid var(--border); color: var(--gold2); border-radius: 2px;
+  font-family: 'Outfit', sans-serif; font-size: 0.82rem; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; cursor: pointer;
+  transition: background 0.22s, color 0.22s;
+}
+.btn-ghost:hover { background: rgba(201,168,76,0.07); color: var(--gold3); }
+
+.price-badge {
+  flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  width: 110px; height: 110px; border-radius: 50%; border: 1px solid var(--border);
+  background: rgba(201,168,76,0.05); text-align: center;
+}
+.price-badge-val { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700; color: var(--gold2); line-height: 1; }
+.price-badge-label { font-size: 0.62rem; font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ash); margin-top: 4px; }
+
+.fallback-wrap {
+  min-height: 80vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 6rem 2rem; gap: 1.5rem;
+}
+.fallback-wrap h2 { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--cream); margin-bottom: 0.5rem; }
+.fallback-wrap p { color: var(--mist); font-weight: 300; font-size: 1rem; max-width: 400px; line-height: 1.75; }
+
+.page-footer {
+  padding: 1.8rem 2rem; background: var(--ink); border-top: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+}
+.footer-logo { font-family: 'Playfair Display', serif; font-size: 0.9rem; color: var(--ash); letter-spacing: 0.06em; }
+.page-footer p { font-size: 0.75rem; color: var(--ash); font-weight: 300; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.7s ease, transform 0.7s cubic-bezier(.22,.68,0,1.1); }
+.reveal.visible { opacity: 1; transform: none; }
+
+@media (max-width: 700px) {
+  nav { padding: 1.1rem 1.2rem; }
+  .hero-result { padding: 7.5rem 1.2rem 4rem; }
+  .data-strip { flex-wrap: wrap; display: grid; grid-template-columns: 1fr 1fr; }
+  .data-cell { border-right: none; border-bottom: 1px solid var(--border2); }
+  .data-cell:nth-child(odd) { border-right: 1px solid var(--border2); }
+  .data-cell:last-child { grid-column: span 2; border-bottom: none; }
+  section { padding: 4rem 1.2rem; }
+  .cta-box-inner { grid-template-columns: 1fr; gap: 2rem; }
+  .price-badge { display: none; }
+  .page-footer { flex-direction: column; text-align: center; }
+}
+@media (max-width: 460px) {
+  .data-strip { grid-template-columns: 1fr; }
+  .data-cell { border-right: none !important; border-bottom: 1px solid var(--border2); }
+  .data-cell:last-child { border-bottom: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="logo">OC Weryfikator<sup>®</sup></a>
+  <a href="ocena.html" class="nav-back">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <path d="M9 11L5 7l4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    Wypełnij ponownie
+  </a>
+</nav>
+
+<!-- CONTENT injected by JS -->
+<div id="app"></div>
+
+<!-- FOOTER -->
+<footer class="page-footer">
+  <div class="footer-logo">OC Weryfikator</div>
+  <p>© 2025 · Narzędzie pomocnicze, nie kancelaria prawna</p>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ─────────────────────────────────────────
+     1. POBIERZ WYNIK
+     Priorytet: URL param ?d= (przekazywany z ocena.html)
+     Fallback:  localStorage
+  ───────────────────────────────────────── */
+  var result  = null;
+  var dane    = null;
+  var reasons = [];
+
+  try {
+    var urlParam = new URLSearchParams(window.location.search).get('d');
+    if (urlParam) {
+      var parsed = JSON.parse(decodeURIComponent(atob(urlParam)));
+      result  = parsed.resultKey || null;
+      reasons = (parsed.wynik && parsed.wynik.reasons) ? parsed.wynik.reasons : [];
+      dane    = parsed.dane || null;
+    } else {
+      result  = localStorage.getItem('resultKey');
+      var w   = JSON.parse(localStorage.getItem('ocena_wynik') || 'null');
+      reasons = (w && w.reasons) ? w.reasons : [];
+      dane    = JSON.parse(localStorage.getItem('ocena_dane') || 'null');
+    }
+  } catch (e) {
+    result = null;
+  }
+
+  /* ─────────────────────────────────────────
+     2. ETYKIETY DLA DATA-STRIP
+  ───────────────────────────────────────── */
+  var actionLabels = { refused: 'Odmowa wypłaty', underpaid: 'Kwota zaniżona', partial: 'Część szkody', delays: 'Brak decyzji' };
+  var amountLabels = { lt1000: 'do 1 000 zł', '1000_3000': '1 000–3 000 zł', '3000_7000': '3 000–7 000 zł', gt7000: 'ponad 7 000 zł', unknown: 'nie wiem' };
+  var docLabels    = { yes: 'Tak', partial: 'Częściowo', no: 'Nie' };
+  var whenLabels   = { '7days': 'ostatnie 7 dni', '30days': 'ostatnie 30 dni', over30: 'ponad miesiąc' };
+
+  var actionLabel = dane ? (actionLabels[dane.insurer_action] || '—') : '—';
+  var amountLabel = dane ? (amountLabels[dane.amount_diff]    || '—') : '—';
+  var docLabel    = dane ? (docLabels[dane.has_doc]           || '—') : '—';
+  var whenLabel   = dane ? (whenLabels[dane.decision_when]    || '—') : '—';
+
+  /* ─────────────────────────────────────────
+     3. BRAK WYNIKU → FALLBACK
+  ───────────────────────────────────────── */
+  var app = document.getElementById('app');
+
+  if (!result || (result !== 'strong' && result !== 'medium' && result !== 'low')) {
+    app.innerHTML =
+      '<div class="fallback-wrap">' +
+        '<div style="font-size:0.72rem;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--ash);margin-bottom:0.5rem;">Brak danych</div>' +
+        '<h2>Nie znaleziono wyniku</h2>' +
+        '<p>Wypełnij formularz ponownie, aby zobaczyć wynik oceny.</p>' +
+        '<a href="ocena.html" class="btn-gold" style="margin-top:0.5rem;"><span>Wróć do formularza</span><span class="btn-arrow">→</span></a>' +
+      '</div>';
+    return;
+  }
+
+  /* ─────────────────────────────────────────
+     4. USTAW TEKST — prosty if/else
+  ───────────────────────────────────────── */
+  var pill, headline, desc, disclaimer, ctaVisible, color, colorDim, colorBorder;
+
+  if (result === 'strong') {
+    pill        = 'Warto się odwołać';
+    headline    = 'Warto rozważyć<br><em>odwołanie</em>';
+    desc        = 'W Twojej sprawie widać wyraźne sygnały, że odwołanie może mieć sens. Na podstawie odpowiedzi wygląda to na typowy przypadek zaniżonego odszkodowania z OC.';
+    disclaimer  = 'To automatyczna ocena oparta na Twoich odpowiedziach — nie jest to porada prawna, ale praktyczna sugestia, czy warto podjąć dalsze kroki.';
+    ctaVisible  = true;
+    color       = '#C9A84C';
+    colorDim    = 'rgba(201,168,76,0.09)';
+    colorBorder = 'rgba(201,168,76,0.28)';
+
+  } else if (result === 'medium') {
+    pill        = 'Pewne podstawy';
+    headline    = 'Warto rozważyć<br><em>odwołanie</em>';
+    desc        = 'W Twojej sprawie są pewne podstawy do odwołania. Sytuacja nie jest jednoznaczna, ale wygląda na to, że warto spróbować i przygotować pismo.';
+    disclaimer  = 'Ocena ma charakter orientacyjny i opiera się wyłącznie na udzielonych odpowiedziach — nie stanowi porady prawnej.';
+    ctaVisible  = true;
+    color       = '#C9A84C';
+    colorDim    = 'rgba(201,168,76,0.06)';
+    colorBorder = 'rgba(201,168,76,0.2)';
+
+  } else {
+    /* low */
+    pill        = 'Słabe sygnały';
+    headline    = 'Brak wyraźnych<br><em>podstaw</em>';
+    desc        = 'Na ten moment nie widać mocnych sygnałów, że odwołanie będzie skuteczne. Jeśli masz dodatkowe dokumenty lub dowody, sytuacja może wyglądać inaczej po ich analizie.';
+    disclaimer  = 'To jedynie wstępna ocena na podstawie formularza — nie jest to opinia prawna.';
+    ctaVisible  = false;
+    color       = '#9C9890';
+    colorDim    = 'rgba(156,152,144,0.07)';
+    colorBorder = 'rgba(156,152,144,0.2)';
+  }
+
+  /* ─────────────────────────────────────────
+     5. USTAW KOLORY CSS
+  ───────────────────────────────────────── */
+  document.documentElement.style.setProperty('--result-color',      color);
+  document.documentElement.style.setProperty('--result-color-dim',  colorDim);
+  document.documentElement.style.setProperty('--result-border',     colorBorder);
+
+  /* ─────────────────────────────────────────
+     6. REASONS
+  ───────────────────────────────────────── */
+  var NEUTRAL = [
+    'Twoje odpowiedzi nie wskazują na wyraźne podstawy do odwołania.',
+    'Warto zachować wszystkie dokumenty na wypadek pojawienia się nowych informacji.'
+  ];
+
+  var reasonsList = (reasons && reasons.length > 0) ? reasons.slice(0, 4) : NEUTRAL;
+  var isNeutral   = !(reasons && reasons.length > 0);
+
+  var reasonsHTML = reasonsList.map(function (r) {
+    var icon = isNeutral
+      ? '<path d="M2 5h6" stroke="#5C5955" stroke-width="1.4" stroke-linecap="round"/>'
+      : '<path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="' + color + '" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>';
+    var txt = r.charAt(0).toUpperCase() + r.slice(1);
+    if (txt.slice(-1) !== '.') txt += '.';
+    return '<div class="reason-item' + (isNeutral ? ' neutral' : '') + ' reveal">' +
+      '<div class="reason-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none">' + icon + '</svg></div>' +
+      '<p class="reason-text">' + txt + '</p>' +
+    '</div>';
+  }).join('');
+
+  /* ─────────────────────────────────────────
+     7. CTA — pokaż lub ukryj
+  ───────────────────────────────────────── */
+  var ctaHTML;
+  if (ctaVisible) {
+    ctaHTML =
+      '<div class="section-pre reveal">Kolejny krok</div>' +
+      '<h2 class="reveal">Chcesz zrobić kolejny krok?</h2>' +
+      '<p class="section-lead reveal">Możemy przygotować gotowe odwołanie na podstawie Twojej sprawy.</p>' +
+      '<div class="cta-box reveal">' +
+        '<div class="cta-box-inner">' +
+          '<div>' +
+            '<h3>Gotowe odwołanie<br>do ubezpieczyciela</h3>' +
+            '<p>Wygeneruj pismo dopasowane do Twojego przypadku. Bez pisania od zera, bez szukania wzorów w internecie.</p>' +
+            '<div class="cta-benefits">' +
+              '<div class="cta-benefit"><span class="cta-benefit-dot"></span>Gotowe do wysłania — od razu po wygenerowaniu</div>' +
+              '<div class="cta-benefit"><span class="cta-benefit-dot"></span>Bez pisania od zera — wypełniasz tylko dane</div>' +
+              '<div class="cta-benefit"><span class="cta-benefit-dot"></span>W kilka minut — bez wiedzy prawnej</div>' +
+            '</div>' +
+            '<div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">' +
+              '<a href="https://buy.stripe.com/cNibJ1e965cO1YK9oJ3cc00" target="_blank" rel="noopener noreferrer" class="btn-gold">' +
+                '<span>Generuj odwołanie</span><span class="btn-arrow">→</span><span class="btn-price">19 zł</span>' +
+              '</a>' +
+              '<a href="ocena.html" class="btn-ghost">Wypełnij ponownie</a>' +
+            '</div>' +
+            '<p style="margin-top:1rem;font-size:0.78rem;color:var(--ash);font-weight:300;line-height:1.6;">' +
+              'Po opłaceniu przejdziesz do bezpiecznej płatności. Następnie otrzymasz instrukcję dalszych kroków.' +
+            '</p>' +
+          '</div>' +
+          '<div class="price-badge"><div class="price-badge-val">19 zł</div><div class="price-badge-label">jednorazowo</div></div>' +
+        '</div>' +
+      '</div>';
+  } else {
+    ctaHTML =
+      '<div class="section-pre reveal">Co możesz zrobić</div>' +
+      '<h2 class="reveal">Kilka sugestii na ten moment</h2>' +
+      '<p class="section-lead reveal">Jeśli masz dodatkowe dokumenty lub dowody, które wcześniej pominąłeś — wróć do formularza i uzupełnij odpowiedzi.</p>' +
+      '<div style="margin-top:1rem;"><a href="ocena.html" class="btn-ghost reveal">Wypełnij ponownie</a></div>';
+  }
+
+  /* ─────────────────────────────────────────
+     8. WSTAW WSZYSTKO DO #app
+  ───────────────────────────────────────── */
+  app.innerHTML =
+    '<div class="hero-result">' +
+      '<div class="hero-orb"></div>' +
+      '<div class="hero-line"></div>' +
+      '<div class="score-ring-wrap">' +
+        '<div class="score-ring">' +
+          '<span class="score-num">✓</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="result-pill"><span class="result-pill-dot"></span>' + pill + '</div>' +
+      '<h1 class="result-headline">' + headline + '</h1>' +
+      '<p class="result-desc">' + desc + '</p>' +
+      '<p style="font-size:0.82rem;color:var(--ash);font-weight:300;max-width:520px;margin:0.5rem auto 2.2rem;line-height:1.65;">' + disclaimer + '</p>' +
+      '<div class="data-strip">' +
+        '<div class="data-cell"><div class="data-cell-label">Sytuacja</div><div class="data-cell-val" style="font-size:1rem;">' + actionLabel + '</div></div>' +
+        '<div class="data-cell"><div class="data-cell-label">Różnica</div><div class="data-cell-val accent">' + amountLabel + '</div></div>' +
+        '<div class="data-cell"><div class="data-cell-label">Dokumenty</div><div class="data-cell-val">' + docLabel + '</div></div>' +
+        '<div class="data-cell"><div class="data-cell-label">Decyzja</div><div class="data-cell-val" style="font-size:1rem;">' + whenLabel + '</div></div>' +
+      '</div>' +
+    '</div>' +
+
+    '<section class="reasons-section">' +
+      '<div class="container">' +
+        '<div class="section-pre reveal">Co wpłynęło na wynik</div>' +
+        '<h2 class="reveal">Na podstawie Twoich odpowiedzi</h2>' +
+        '<p class="section-lead reveal">Poniżej znajdziesz elementy wzięte pod uwagę przy ocenie Twojej sytuacji.</p>' +
+        '<div class="reasons-list">' + reasonsHTML + '</div>' +
+      '</div>' +
+    '</section>' +
+
+    '<section class="cta-section"><div class="container">' + ctaHTML + '</div></section>';
+
+  /* ─────────────────────────────────────────
+     9. SCROLL REVEAL
+  ───────────────────────────────────────── */
+  var revealEls = document.querySelectorAll('.reveal');
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e, i) {
+      if (e.isIntersecting) {
+        setTimeout(function () { e.target.classList.add('visible'); }, i * 55);
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+  revealEls.forEach(function (el) { io.observe(el); });
+
+})();
+</script>
+</body>
+</html>
