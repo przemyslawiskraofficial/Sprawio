@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gotowe odwołanie — OC Weryfikator</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:     #0A0A0B;
+  --ink2:    #111114;
+  --ink3:    #18181C;
+  --ink4:    #1E1E23;
+  --gold:    #C9A84C;
+  --gold2:   #E2C07A;
+  --gold3:   #F5E4B8;
+  --cream:   #FAF7F2;
+  --smoke:   #F0EDE8;
+  --mist:    #9C9890;
+  --ash:     #5C5955;
+  --border:  rgba(201,168,76,0.18);
+  --border2: rgba(201,168,76,0.08);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--ink);
+  color: var(--cream);
+  line-height: 1.7;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+body::before {
+  content: ''; position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.028; pointer-events: none; z-index: 9999;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  padding: 1.3rem 3rem;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(10,10,11,0.88);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border2);
+}
+
+.logo {
+  font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 600;
+  color: var(--gold2); letter-spacing: 0.04em; text-transform: uppercase; text-decoration: none;
+}
+.logo sup {
+  font-family: 'Outfit', sans-serif; font-size: 0.5rem; font-weight: 400;
+  color: var(--mist); letter-spacing: 0.12em; vertical-align: super; margin-left: 2px;
+}
+
+/* ── HERO ── */
+.hero {
+  padding: 8rem 2rem 3rem;
+  text-align: center;
+  position: relative; overflow: hidden;
+}
+
+.hero-orb {
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 600px; height: 360px;
+  background: radial-gradient(ellipse at 50% 0%,
+    rgba(201,168,76,0.09) 0%, rgba(201,168,76,0.03) 50%, transparent 80%);
+  pointer-events: none;
+}
+.hero-line {
+  position: absolute; top: 0; left: 50%; width: 1px; height: 70px;
+  background: linear-gradient(to bottom, transparent, var(--gold)); opacity: 0.3;
+}
+
+.success-badge {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: rgba(201,168,76,0.07); border: 1px solid var(--border);
+  padding: 0.4rem 1.1rem; border-radius: 2px;
+  font-size: 0.7rem; font-weight: 500; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--gold);
+  margin-bottom: 1.8rem;
+  animation: fadeIn 0.8s ease both;
+}
+.success-dot {
+  width: 5px; height: 5px; border-radius: 50%; background: var(--gold);
+}
+
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.65rem, 4vw, 2.6rem); font-weight: 700;
+  color: var(--cream); line-height: 1.15; letter-spacing: -0.01em;
+  max-width: 620px; margin: 0 auto 1rem;
+  animation: fadeUp 0.8s cubic-bezier(.22,.68,0,1.2) 0.1s both;
+}
+.hero h1 em { font-style: italic; color: var(--gold2); }
+
+.hero-sub {
+  font-size: 0.97rem; color: var(--mist); font-weight: 300;
+  max-width: 460px; margin: 0 auto 2rem; line-height: 1.75;
+  animation: fadeUp 0.8s cubic-bezier(.22,.68,0,1.2) 0.2s both;
+}
+
+/* ── META STRIP ── */
+.meta-strip {
+  display: inline-flex; align-items: stretch;
+  border: 1px solid var(--border2); background: var(--ink2); overflow: hidden;
+  animation: fadeUp 0.8s cubic-bezier(.22,.68,0,1.2) 0.3s both;
+}
+.meta-cell {
+  padding: 0.75rem 1.5rem; text-align: center;
+  border-right: 1px solid var(--border2);
+}
+.meta-cell:last-child { border-right: none; }
+.meta-label { font-size: 0.65rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ash); margin-bottom: 0.2rem; }
+.meta-val   { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 600; color: var(--cream); }
+.meta-val.accent { color: var(--gold2); }
+
+/* ── MAIN CONTENT ── */
+.content-wrap {
+  max-width: 760px; margin: 0 auto;
+  padding: 2.5rem 2rem 6rem;
+}
+
+/* ── ACTIONS BAR ── */
+.actions-bar {
+  display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+  margin-bottom: 2rem;
+  animation: fadeUp 0.8s cubic-bezier(.22,.68,0,1.2) 0.35s both;
+}
+
+.btn-gold {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 0.9rem 1.8rem;
+  background: linear-gradient(135deg, var(--gold) 0%, #B8923A 100%);
+  color: var(--ink); border: none; border-radius: 2px;
+  font-family: 'Outfit', sans-serif; font-size: 0.82rem; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none;
+  cursor: pointer; position: relative; overflow: hidden;
+  transition: transform 0.22s cubic-bezier(.22,.68,0,1.2), box-shadow 0.22s;
+}
+.btn-gold::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--gold2) 0%, var(--gold) 100%);
+  opacity: 0; transition: opacity 0.25s;
+}
+.btn-gold:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(201,168,76,0.25); }
+.btn-gold:hover::before { opacity: 1; }
+.btn-gold span { position: relative; }
+
+.btn-ghost {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 0.9rem 1.5rem;
+  background: transparent; border: 1px solid var(--border);
+  color: var(--gold2); border-radius: 2px;
+  font-family: 'Outfit', sans-serif; font-size: 0.82rem; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer;
+  transition: background 0.22s, color 0.22s; text-decoration: none;
+}
+.btn-ghost:hover { background: rgba(201,168,76,0.07); color: var(--gold3); }
+
+/* ── APPEAL CARD ── */
+.appeal-card {
+  background: var(--ink2);
+  border: 1px solid var(--border2);
+  position: relative;
+  animation: fadeUp 0.9s cubic-bezier(.22,.68,0,1.2) 0.4s both;
+}
+.appeal-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(to right, transparent, var(--gold) 50%, transparent);
+  opacity: 0.4;
+}
+
+.appeal-card-header {
+  padding: 1.4rem 2rem;
+  border-bottom: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+}
+
+.appeal-label {
+  font-size: 0.68rem; font-weight: 500; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--gold); opacity: 0.8;
+  display: flex; align-items: center; gap: 10px;
+}
+.appeal-label::before {
+  content: ''; display: block; width: 16px; height: 1px; background: var(--gold); opacity: 0.5;
+}
+
+.btn-copy {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 0.5rem 1rem;
+  background: transparent; border: 1px solid var(--border2);
+  color: var(--mist); border-radius: 2px;
+  font-family: 'Outfit', sans-serif; font-size: 0.75rem; font-weight: 400;
+  letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.btn-copy:hover { border-color: var(--gold); color: var(--gold2); background: rgba(201,168,76,0.05); }
+.btn-copy.copied { border-color: var(--gold); color: var(--gold); }
+
+/* ── APPEAL TEXT ── */
+.appeal-body {
+  padding: 2rem 2.2rem;
+}
+
+#appeal-text {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem; font-weight: 300;
+  color: var(--smoke); line-height: 1.9;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ── DISCLAIMER ── */
+.disclaimer {
+  margin-top: 1.5rem;
+  padding: 1.2rem 1.6rem;
+  border-left: 2px solid var(--gold);
+  background: rgba(201,168,76,0.04);
+  animation: fadeUp 0.8s cubic-bezier(.22,.68,0,1.2) 0.5s both;
+}
+.disclaimer p {
+  font-size: 0.8rem; color: var(--ash); font-weight: 300; line-height: 1.7;
+}
+
+/* ── FALLBACK ── */
+.fallback-wrap {
+  min-height: 70vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center;
+  padding: 6rem 2rem; gap: 1.5rem;
+}
+.fallback-wrap h2 { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--cream); }
+.fallback-wrap p  { color: var(--mist); font-weight: 300; max-width: 400px; line-height: 1.75; }
+
+/* ── FOOTER ── */
+footer {
+  padding: 1.6rem 2rem; background: var(--ink); border-top: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+}
+.footer-logo { font-family: 'Playfair Display', serif; font-size: 0.9rem; color: var(--ash); letter-spacing: 0.06em; }
+footer p { font-size: 0.75rem; color: var(--ash); font-weight: 300; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 680px) {
+  nav { padding: 1.1rem 1.2rem; }
+  .hero { padding: 7rem 1.2rem 2.5rem; }
+  .meta-strip { flex-wrap: wrap; display: grid; grid-template-columns: 1fr 1fr; }
+  .meta-cell { border-right: none; border-bottom: 1px solid var(--border2); }
+  .meta-cell:nth-child(odd) { border-right: 1px solid var(--border2); }
+  .meta-cell:last-child { grid-column: span 2; border-bottom: none; }
+  .content-wrap { padding: 2rem 1rem 4rem; }
+  .actions-bar { flex-direction: column; align-items: stretch; }
+  .actions-bar .btn-gold, .actions-bar .btn-ghost { justify-content: center; }
+  .appeal-card-header { flex-direction: column; align-items: flex-start; }
+  .appeal-body { padding: 1.5rem 1.4rem; }
+  footer { flex-direction: column; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="logo">OC Weryfikator<sup>®</sup></a>
+</nav>
+
+<!-- HERO -->
+<div class="hero" id="hero">
+  <div class="hero-orb"></div>
+  <div class="hero-line"></div>
+
+  <div class="success-badge">
+    <span class="success-dot"></span>
+    Odwołanie gotowe
+  </div>
+
+  <h1>Twoje odwołanie<br><em>jest gotowe do wysłania</em></h1>
+  <p class="hero-sub" id="hero-sub">Poniżej znajdziesz gotowe pismo dopasowane do Twojej sprawy. Skopiuj je, wydrukuj lub wyślij mailem do ubezpieczyciela.</p>
+
+  <div class="meta-strip" id="meta-strip">
+    <div class="meta-cell">
+      <div class="meta-label">Ubezpieczyciel</div>
+      <div class="meta-val" id="meta-insurer">—</div>
+    </div>
+    <div class="meta-cell">
+      <div class="meta-label">Nr sprawy</div>
+      <div class="meta-val" id="meta-case">—</div>
+    </div>
+    <div class="meta-cell">
+      <div class="meta-label">Różnica</div>
+      <div class="meta-val accent" id="meta-diff">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content-wrap" id="content">
+
+  <!-- ACTIONS -->
+  <div class="actions-bar">
+    <button class="btn-gold" id="btn-download" onclick="downloadTxt()">
+      <span>⬇ Pobierz jako .txt</span>
+    </button>
+    <button class="btn-ghost" id="btn-copy-top" onclick="copyAppeal()">
+      Kopiuj tekst
+    </button>
+    <a href="/formularz.html" class="btn-ghost">Wróć do formularza</a>
+  </div>
+
+  <!-- APPEAL CARD -->
+  <div class="appeal-card">
+    <div class="appeal-card-header">
+      <div class="appeal-label">Treść odwołania</div>
+      <button class="btn-copy" id="btn-copy" onclick="copyAppeal()">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <rect x="4.5" y="4.5" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.1"/>
+          <path d="M3 8.5H2a1 1 0 01-1-1V2a1 1 0 011-1h5.5a1 1 0 011 1v1" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
+        </svg>
+        Kopiuj
+      </button>
+    </div>
+    <div class="appeal-body">
+      <pre id="appeal-text">Ładowanie…</pre>
+    </div>
+  </div>
+
+  <!-- DISCLAIMER -->
+  <div class="disclaimer">
+    <p>To odwołanie zostało wygenerowane automatycznie na podstawie podanych danych. Przed wysłaniem przeczytaj je uważnie i uzupełnij jeśli uznasz za stosowne. Dokument nie stanowi porady prawnej — w skomplikowanych sprawach warto skonsultować się z prawnikiem.</p>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">OC Weryfikator</div>
+  <p>© 2025 · Narzędzie pomocnicze, nie kancelaria prawna</p>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ── ODCZYT WYNIKU ── */
+  var raw = null;
+  try { raw = sessionStorage.getItem('appeal_result'); } catch(e) {}
+
+  var appealText = null;
+  var meta       = null;
+
+  if (raw) {
+    try {
+      var parsed = JSON.parse(raw);
+      appealText = parsed.appeal || null;
+      meta       = parsed.meta   || null;
+    } catch(e) {}
+  }
+
+  /* ── FALLBACK — brak danych ── */
+  if (!appealText) {
+    document.getElementById('hero').style.display = 'none';
+    document.getElementById('content').innerHTML =
+      '<div class="fallback-wrap">' +
+        '<h2>Nie znaleziono odwołania</h2>' +
+        '<p>Wróć do formularza i wygeneruj odwołanie ponownie.</p>' +
+        '<a href="/formularz.html" class="btn-gold" style="margin-top:0.5rem;"><span>Wróć do formularza</span></a>' +
+      '</div>';
+    return;
+  }
+
+  /* ── WYPEŁNIJ TREŚĆ ── */
+  document.getElementById('appeal-text').textContent = appealText;
+
+  /* ── META ── */
+  if (meta) {
+    document.getElementById('meta-insurer').textContent = meta.insurer || '—';
+    document.getElementById('meta-case').textContent    = meta.case_number || '—';
+    var diff = meta.diff;
+    document.getElementById('meta-diff').textContent =
+      (diff > 0 ? '+' : '') + Number(diff).toLocaleString('pl-PL') + ' zł';
+  }
+
+  /* ── COPY ── */
+  window.copyAppeal = function () {
+    navigator.clipboard.writeText(appealText).then(function () {
+      var btns = [document.getElementById('btn-copy'), document.getElementById('btn-copy-top')];
+      btns.forEach(function(b) { if(b) { b.classList.add('copied'); b.textContent = '✓ Skopiowano'; } });
+      setTimeout(function () {
+        var c1 = document.getElementById('btn-copy');
+        var c2 = document.getElementById('btn-copy-top');
+        if (c1) { c1.classList.remove('copied'); c1.innerHTML = '<svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="4.5" y="4.5" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.1"/><path d="M3 8.5H2a1 1 0 01-1-1V2a1 1 0 011-1h5.5a1 1 0 011 1v1" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg> Kopiuj'; }
+        if (c2) { c2.classList.remove('copied'); c2.textContent = 'Kopiuj tekst'; }
+      }, 2500);
+    }).catch(function () {
+      /* fallback dla starszych przeglądarek */
+      var ta = document.createElement('textarea');
+      ta.value = appealText;
+      ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    });
+  };
+
+  /* ── DOWNLOAD .TXT ── */
+  window.downloadTxt = function () {
+    var insurer    = (meta && meta.insurer)     ? meta.insurer     : 'ubezpieczyciel';
+    var caseNum    = (meta && meta.case_number) ? meta.case_number : 'sprawa';
+    var filename   = 'odwolanie_' + insurer.replace(/\s+/g, '_') + '_' + caseNum.replace(/\//g, '-') + '.txt';
+
+    var blob = new Blob([appealText], { type: 'text/plain;charset=utf-8' });
+    var url  = URL.createObjectURL(blob);
+    var a    = document.createElement('a');
+    a.href     = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+})();
+</script>
+</body>
+</html>

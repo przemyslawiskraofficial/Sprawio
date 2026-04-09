@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Formularz danych — OC Weryfikator</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:     #0A0A0B;
+  --ink2:    #111114;
+  --ink3:    #18181C;
+  --ink4:    #1E1E23;
+  --gold:    #C9A84C;
+  --gold2:   #E2C07A;
+  --gold3:   #F5E4B8;
+  --cream:   #FAF7F2;
+  --smoke:   #F0EDE8;
+  --mist:    #9C9890;
+  --ash:     #5C5955;
+  --border:  rgba(201,168,76,0.18);
+  --border2: rgba(201,168,76,0.08);
+  --red:     #E05252;
+  --red-bg:  rgba(224,82,82,0.08);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--ink);
+  color: var(--cream);
+  line-height: 1.7;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.028;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  padding: 1.3rem 3rem;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(10,10,11,0.88);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border2);
+}
+
+.logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem; font-weight: 600;
+  color: var(--gold2); letter-spacing: 0.04em;
+  text-transform: uppercase; text-decoration: none;
+}
+.logo sup {
+  font-family: 'Outfit', sans-serif; font-size: 0.5rem;
+  font-weight: 400; color: var(--mist); letter-spacing: 0.12em;
+  vertical-align: super; margin-left: 2px;
+}
+
+.nav-step {
+  font-size: 0.75rem; font-weight: 400; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--ash);
+}
+
+/* ── HERO MINI ── */
+.hero-mini {
+  padding: 8rem 2rem 3.5rem;
+  text-align: center;
+  position: relative; overflow: hidden;
+}
+
+.hero-mini-orb {
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 600px; height: 360px;
+  background: radial-gradient(ellipse at 50% 0%,
+    rgba(201,168,76,0.08) 0%, rgba(201,168,76,0.03) 50%, transparent 80%);
+  pointer-events: none;
+}
+
+.hero-mini-line {
+  position: absolute; top: 0; left: 50%;
+  width: 1px; height: 70px;
+  background: linear-gradient(to bottom, transparent, var(--gold));
+  opacity: 0.3;
+}
+
+.step-pill {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: rgba(201,168,76,0.07); border: 1px solid var(--border);
+  padding: 0.38rem 1rem; border-radius: 2px;
+  font-size: 0.7rem; font-weight: 500; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--gold);
+  margin-bottom: 1.8rem; animation: fadeIn 0.8s ease both;
+}
+
+.step-pill-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--gold); opacity: 0.8;
+}
+
+.hero-mini h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.6rem, 4vw, 2.6rem); font-weight: 700;
+  color: var(--cream); line-height: 1.15; letter-spacing: -0.01em;
+  max-width: 600px; margin: 0 auto 1rem;
+  animation: fadeUp 0.8s cubic-bezier(.22,.68,0,1.2) 0.1s both;
+}
+.hero-mini h1 em { font-style: italic; color: var(--gold2); }
+
+.hero-mini-sub {
+  font-size: 0.97rem; color: var(--mist); font-weight: 300;
+  max-width: 460px; margin: 0 auto;
+  line-height: 1.75;
+  animation: fadeUp 0.8s cubic-bezier(.22,.68,0,1.2) 0.2s both;
+}
+
+/* ── FORM OUTER ── */
+.form-outer {
+  padding: 2.5rem 2rem 6rem;
+  display: flex; flex-direction: column; align-items: center; gap: 1.5px;
+}
+
+/* ── FORM CARD ── */
+.form-card {
+  width: 100%; max-width: 600px;
+  background: var(--ink2);
+  border: 1px solid var(--border2);
+  position: relative;
+  animation: fadeUp 0.9s cubic-bezier(.22,.68,0,1.2) 0.2s both;
+}
+
+.form-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(to right, transparent, var(--gold) 50%, transparent);
+  opacity: 0.45;
+}
+
+/* ── SECTION HEADER ── */
+.form-section-header {
+  padding: 1.6rem 2.5rem 0;
+  display: flex; align-items: center; gap: 12px;
+  font-size: 0.68rem; font-weight: 500; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--gold); opacity: 0.8;
+}
+.form-section-header::before {
+  content: ''; display: block; width: 18px; height: 1px;
+  background: var(--gold); opacity: 0.6;
+}
+
+/* ── FIELD BLOCK ── */
+.field-block {
+  padding: 1.5rem 2.5rem;
+  border-bottom: 1px solid var(--border2);
+}
+.field-block:last-of-type { border-bottom: none; }
+
+.field-label {
+  display: block;
+  font-size: 0.82rem; font-weight: 500; letter-spacing: 0.04em;
+  color: var(--mist); margin-bottom: 0.55rem;
+}
+.field-label .req {
+  color: var(--gold); margin-left: 3px; font-size: 0.75rem;
+}
+
+/* ── INPUTS ── */
+input[type="text"],
+input[type="email"],
+input[type="number"],
+input[type="date"] {
+  width: 100%;
+  padding: 0.9rem 1.1rem;
+  background: var(--ink3);
+  border: 1px solid var(--border2);
+  color: var(--cream);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.97rem; font-weight: 400;
+  outline: none; border-radius: 2px;
+  transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
+  -moz-appearance: textfield;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+input::placeholder { color: var(--ash); font-weight: 300; }
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.4) sepia(1) saturate(2) hue-rotate(5deg);
+  cursor: pointer; opacity: 0.6;
+}
+input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
+
+input:hover {
+  border-color: rgba(201,168,76,0.22);
+  background: var(--ink4);
+}
+input:focus {
+  border-color: var(--gold);
+  background: var(--ink4);
+  box-shadow: 0 0 0 3px rgba(201,168,76,0.08);
+}
+input.error { border-color: var(--red); box-shadow: 0 0 0 3px var(--red-bg); }
+
+/* ── TWO COLUMNS ── */
+.field-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+}
+
+/* ── CURRENCY INPUT ── */
+.currency-wrap { position: relative; }
+.currency-tag {
+  position: absolute; left: 1.1rem; top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.82rem; font-weight: 500; color: var(--gold);
+  pointer-events: none; user-select: none;
+}
+.currency-wrap input { padding-left: 3.4rem; }
+
+/* ── CHECKBOXES ── */
+.check-group { display: flex; flex-direction: column; gap: 0.6rem; }
+
+.check-item {
+  display: flex; align-items: center;
+  cursor: pointer; position: relative;
+}
+.check-item input[type="checkbox"] { position: absolute; opacity: 0; width: 0; height: 0; }
+
+.check-visual {
+  flex-shrink: 0; width: 20px; height: 20px;
+  border: 1px solid var(--border2); background: var(--ink3);
+  border-radius: 2px; display: flex; align-items: center; justify-content: center;
+  transition: border-color 0.2s, background 0.2s; margin-right: 13px;
+}
+.check-visual svg { opacity: 0; transform: scale(0.5); transition: opacity 0.18s, transform 0.18s cubic-bezier(.22,.68,0,1.4); }
+
+.check-item:hover .check-visual { border-color: rgba(201,168,76,0.35); background: var(--ink4); }
+.check-item input:checked ~ .check-visual { border-color: var(--gold); background: rgba(201,168,76,0.12); }
+.check-item input:checked ~ .check-visual svg { opacity: 1; transform: scale(1); }
+
+.check-text { font-size: 0.93rem; color: var(--smoke); font-weight: 300; line-height: 1.5; transition: color 0.2s; }
+.check-item:hover .check-text { color: var(--cream); }
+.check-item input:checked ~ .check-visual ~ .check-text { color: var(--cream); }
+
+/* ── OTHER TEXTAREA ── */
+.other-field {
+  margin-top: 0.9rem;
+  display: none;
+}
+.other-field.visible { display: block; }
+
+textarea {
+  width: 100%; padding: 0.9rem 1.1rem;
+  background: var(--ink3); border: 1px solid var(--border2);
+  color: var(--cream); font-family: 'Outfit', sans-serif;
+  font-size: 0.93rem; font-weight: 300; outline: none; border-radius: 2px;
+  resize: vertical; min-height: 90px; line-height: 1.7;
+  transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
+}
+textarea::placeholder { color: var(--ash); font-weight: 300; }
+textarea:hover { border-color: rgba(201,168,76,0.22); background: var(--ink4); }
+textarea:focus { border-color: var(--gold); background: var(--ink4); box-shadow: 0 0 0 3px rgba(201,168,76,0.08); }
+
+/* ── FIELD ERROR ── */
+.field-error {
+  margin-top: 0.5rem; font-size: 0.77rem; color: var(--red);
+  font-weight: 400; display: flex; align-items: center; gap: 6px;
+  opacity: 0; height: 0; overflow: hidden;
+  transition: opacity 0.25s, height 0.25s;
+}
+.field-error.show { opacity: 1; height: 1.3rem; }
+.field-error svg { flex-shrink: 0; }
+
+/* ── DIVIDER between sections ── */
+.section-divider {
+  width: 100%; max-width: 600px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--border), transparent);
+}
+
+/* ── SUBMIT AREA ── */
+.submit-area {
+  width: 100%; max-width: 600px;
+  padding: 2rem 2.5rem 2.5rem;
+  background: var(--ink2);
+  border: 1px solid var(--border2);
+  position: relative;
+  animation: fadeUp 0.9s cubic-bezier(.22,.68,0,1.2) 0.3s both;
+}
+
+.submit-area::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(to right, transparent, var(--gold) 50%, transparent);
+  opacity: 0.35;
+}
+
+.btn-submit {
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px;
+  padding: 1.2rem 2rem;
+  background: linear-gradient(135deg, var(--gold) 0%, #B8923A 100%);
+  color: var(--ink); border: none; border-radius: 2px;
+  font-family: 'Outfit', sans-serif; font-size: 0.9rem; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer;
+  position: relative; overflow: hidden;
+  transition: transform 0.22s cubic-bezier(.22,.68,0,1.2), box-shadow 0.22s;
+}
+.btn-submit::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--gold2) 0%, var(--gold) 100%);
+  opacity: 0; transition: opacity 0.25s;
+}
+.btn-submit:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(201,168,76,0.28); }
+.btn-submit:hover::before { opacity: 1; }
+.btn-submit:active { transform: translateY(0); }
+.btn-submit span, .btn-arrow { position: relative; }
+.btn-arrow { font-size: 1.1em; transition: transform 0.22s; position: relative; }
+.btn-submit:hover .btn-arrow { transform: translateX(4px); }
+
+.submit-note {
+  text-align: center; margin-top: 0.9rem;
+  font-size: 0.76rem; color: var(--ash); font-weight: 300; letter-spacing: 0.03em;
+}
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 2rem; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--ink3); border: 1px solid rgba(224,82,82,0.35);
+  color: var(--red); padding: 0.8rem 1.6rem;
+  font-size: 0.85rem; font-weight: 400; letter-spacing: 0.03em;
+  z-index: 500; opacity: 0; pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s;
+  border-radius: 2px; white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── FOOTER ── */
+footer {
+  padding: 1.6rem 2rem;
+  background: var(--ink); border-top: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 1rem;
+}
+.footer-logo { font-family: 'Playfair Display', serif; font-size: 0.9rem; color: var(--ash); letter-spacing: 0.06em; }
+footer p { font-size: 0.75rem; color: var(--ash); font-weight: 300; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 680px) {
+  nav { padding: 1.1rem 1.2rem; }
+  .hero-mini { padding: 7rem 1.2rem 2.8rem; }
+  .form-outer { padding: 2rem 1rem 4rem; }
+  .field-block { padding: 1.4rem 1.4rem; }
+  .form-section-header { padding: 1.4rem 1.4rem 0; }
+  .submit-area { padding: 1.6rem 1.4rem 2rem; }
+  .field-row { grid-template-columns: 1fr; gap: 1rem; }
+  footer { flex-direction: column; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="logo">OC Weryfikator<sup>®</sup></a>
+  <span class="nav-step">Krok 1 z 1</span>
+</nav>
+
+<!-- HERO -->
+<div class="hero-mini">
+  <div class="hero-mini-orb"></div>
+  <div class="hero-mini-line"></div>
+
+  <div class="step-pill">
+    <span class="step-pill-dot"></span>
+    Dane do odwołania
+  </div>
+
+  <h1>Uzupełnij dane,<br><em>wygenerujemy resztę</em></h1>
+  <p class="hero-mini-sub">Wypełnienie zajmie około 2 minut. Na podstawie tych informacji przygotujemy gotowe odwołanie dopasowane do Twojej sprawy.</p>
+</div>
+
+<!-- FORM -->
+<div class="form-outer">
+
+  <div class="form-card" id="formCard">
+
+    <!-- SEKCJA: Dane osobowe -->
+    <div class="form-section-header">Dane osobowe</div>
+
+    <div class="field-block">
+      <label class="field-label" for="full_name">Imię i nazwisko <span class="req">*</span></label>
+      <input type="text" id="full_name" name="full_name" placeholder="np. Anna Kowalska" autocomplete="name">
+      <div class="field-error" id="err-full_name">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><path d="M6 3.5v3M6 8.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Podaj imię i nazwisko.
+      </div>
+    </div>
+
+    <div class="field-block">
+      <label class="field-label" for="address">Adres <span class="req">*</span></label>
+      <input type="text" id="address" name="address" placeholder="ul. Przykładowa 12/3, 00-000 Warszawa" autocomplete="street-address">
+      <div class="field-error" id="err-address">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><path d="M6 3.5v3M6 8.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Podaj adres.
+      </div>
+    </div>
+
+    <div class="field-block">
+      <label class="field-label" for="email">E-mail <span class="req">*</span></label>
+      <input type="email" id="email" name="email" placeholder="twoj@email.pl" autocomplete="email">
+      <div class="field-error" id="err-email">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><path d="M6 3.5v3M6 8.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Podaj prawidłowy adres e-mail.
+      </div>
+    </div>
+
+    <!-- SEKCJA: Dane sprawy -->
+    <div class="form-section-header" style="margin-top: 0.5rem;">Dane sprawy</div>
+
+    <div class="field-block">
+      <label class="field-label" for="insurer">Nazwa ubezpieczyciela <span class="req">*</span></label>
+      <input type="text" id="insurer" name="insurer" placeholder="np. PZU, Warta, Allianz…">
+      <div class="field-error" id="err-insurer">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><path d="M6 3.5v3M6 8.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Podaj nazwę ubezpieczyciela.
+      </div>
+    </div>
+
+    <div class="field-block">
+      <label class="field-label" for="case_number">Numer szkody / sprawy <span class="req">*</span></label>
+      <input type="text" id="case_number" name="case_number" placeholder="np. SZ/2024/123456">
+      <div class="field-error" id="err-case_number">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><path d="M6 3.5v3M6 8.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Podaj numer szkody lub sprawy.
+      </div>
+    </div>
+
+    <div class="field-block">
+      <label class="field-label" for="decision_date">Data decyzji <span class="req">*</span></label>
+      <input type="date" id="decision_date" name="decision_date">
+      <div class="field-error" id="err-decision_date">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><path d="M6 3.5v3M6 8.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Podaj datę decyzji.
+      </div>
+    </div>
+
+    <!-- SEKCJA: Kwoty -->
+    <div class="form-section-header" style="margin-top: 0.5rem;">Kwoty</div>
+
+    <div class="field-block">
+      <div class="field-row">
+        <div>
+          <label class="field-label" for="payout_amount">Kwota wypłacona <span class="req">*</span></label>
+          <div class="currency-wrap">
+            <span class="currency-tag">PLN</span>
+            <input type="number" id="payout_amount" name="payout_amount" placeholder="np. 4 200" min="0">
+          </div>
+          <div class="field-error" id="err-payout_amount">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><path d="M6 3.5v3M6 8.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            Podaj kwotę.
+          </div>
+        </div>
+        <div>
+          <label class="field-label" for="expected_amount">Kwota oczekiwana <span class="req">*</span></label>
+          <div class="currency-wrap">
+            <span class="currency-tag">PLN</span>
+            <input type="number" id="expected_amount" name="expected_amount" placeholder="np. 7 000" min="0">
+          </div>
+          <div class="field-error" id="err-expected_amount">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><path d="M6 3.5v3M6 8.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            Podaj kwotę.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEKCJA: Problem z decyzją -->
+    <div class="form-section-header" style="margin-top: 0.5rem;">Co jest nie tak z decyzją?</div>
+
+    <div class="field-block">
+      <label class="field-label">Zaznacz wszystko, co dotyczy Twojej sprawy <span class="req">*</span></label>
+      <div class="check-group" id="issues_group">
+        <label class="check-item">
+          <input type="checkbox" name="issues" id="issue_undervalued" value="undervalued">
+          <span class="check-visual"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="check-text">Zaniżony kosztorys</span>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" name="issues" id="issue_missing" value="missing">
+          <span class="check-visual"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="check-text">Pominięte elementy</span>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" name="issues" id="issue_labor" value="labor">
+          <span class="check-visual"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="check-text">Zaniżone roboczogodziny</span>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" name="issues" id="issue_refused" value="refused">
+          <span class="check-visual"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="check-text">Odmowa wypłaty</span>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" name="issues" id="issue_other" value="other">
+          <span class="check-visual"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="check-text">Inne</span>
+        </label>
+      </div>
+
+      <div class="other-field" id="other_field_wrap">
+        <label class="field-label" for="other_description" style="margin-top: 0.2rem;">Opisz problem <span class="req">*</span></label>
+        <textarea id="other_description" name="other_description" placeholder="Opisz krótko, co jest nie tak z decyzją ubezpieczyciela…"></textarea>
+        <div class="field-error" id="err-other_description">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><path d="M6 3.5v3M6 8.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          Opisz problem.
+        </div>
+      </div>
+
+      <div class="field-error" id="err-issues">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><path d="M6 3.5v3M6 8.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Zaznacz co najmniej jedną opcję.
+      </div>
+    </div>
+
+  </div><!-- /form-card -->
+
+  <!-- SUBMIT -->
+  <div class="submit-area">
+    <button class="btn-submit" id="submitBtn" type="button">
+      <span>Generuj odwołanie</span>
+      <span class="btn-arrow">→</span>
+    </button>
+    <p class="submit-note">Twoje dane są bezpieczne i służą wyłącznie do przygotowania pisma.</p>
+  </div>
+
+</div><!-- /form-outer -->
+
+<!-- TOAST -->
+<div class="toast" id="toast">Uzupełnij wszystkie wymagane pola.</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">OC Weryfikator</div>
+  <p>© 2025 · Narzędzie pomocnicze, nie kancelaria prawna</p>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  var $ = function(id) { return document.getElementById(id); };
+
+  /* ── INNE — pokaż/ukryj pole tekstowe ── */
+  $('issue_other').addEventListener('change', function () {
+    var wrap = $('other_field_wrap');
+    if (this.checked) {
+      wrap.classList.add('visible');
+    } else {
+      wrap.classList.remove('visible');
+      $('other_description').value = '';
+      hideErr('err-other_description');
+    }
+  });
+
+  /* ── ERROR HELPERS ── */
+  function showErr(id) {
+    var el = $(id);
+    if (el) el.classList.add('show');
+  }
+  function hideErr(id) {
+    var el = $(id);
+    if (el) el.classList.remove('show');
+  }
+
+  /* ── CLEAR ON FIX ── */
+  function bindClear(inputId, errId) {
+    var el = $(inputId);
+    if (!el) return;
+    el.addEventListener('input', function () {
+      if (this.value.trim()) { hideErr(errId); this.classList.remove('error'); }
+    });
+    el.addEventListener('change', function () {
+      if (this.value.trim()) { hideErr(errId); this.classList.remove('error'); }
+    });
+  }
+
+  bindClear('full_name',       'err-full_name');
+  bindClear('address',         'err-address');
+  bindClear('email',           'err-email');
+  bindClear('insurer',         'err-insurer');
+  bindClear('case_number',     'err-case_number');
+  bindClear('decision_date',   'err-decision_date');
+  bindClear('payout_amount',   'err-payout_amount');
+  bindClear('expected_amount', 'err-expected_amount');
+  bindClear('other_description','err-other_description');
+
+  document.querySelectorAll('input[name="issues"]').forEach(function (cb) {
+    cb.addEventListener('change', function () {
+      if (document.querySelectorAll('input[name="issues"]:checked').length > 0) {
+        hideErr('err-issues');
+      }
+    });
+  });
+
+  /* ── VALIDATION ── */
+  function isValidEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+
+  function validate() {
+    var ok = true;
+
+    function req(id, errId) {
+      var el = $(id);
+      if (!el || !el.value.trim()) {
+        showErr(errId); if (el) el.classList.add('error'); ok = false;
+      } else {
+        hideErr(errId); el.classList.remove('error');
+      }
+    }
+
+    req('full_name',       'err-full_name');
+    req('address',         'err-address');
+    req('insurer',         'err-insurer');
+    req('case_number',     'err-case_number');
+    req('decision_date',   'err-decision_date');
+    req('payout_amount',   'err-payout_amount');
+    req('expected_amount', 'err-expected_amount');
+
+    /* email */
+    var emailVal = $('email').value.trim();
+    if (!emailVal || !isValidEmail(emailVal)) {
+      showErr('err-email'); $('email').classList.add('error'); ok = false;
+    } else {
+      hideErr('err-email'); $('email').classList.remove('error');
+    }
+
+    /* checkboxy */
+    var checked = document.querySelectorAll('input[name="issues"]:checked');
+    if (checked.length === 0) {
+      showErr('err-issues'); ok = false;
+    } else {
+      hideErr('err-issues');
+    }
+
+    /* pole "inne" */
+    if ($('issue_other').checked) {
+      var otherVal = $('other_description').value.trim();
+      if (!otherVal) {
+        showErr('err-other_description'); $('other_description').classList.add('error'); ok = false;
+      } else {
+        hideErr('err-other_description'); $('other_description').classList.remove('error');
+      }
+    }
+
+    return ok;
+  }
+
+  /* ── TOAST ── */
+  var toastTimer;
+  function showToast(msg) {
+    var t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove('show'); }, 3500);
+  }
+
+  /* ── SUBMIT ── */
+  $('submitBtn').addEventListener('click', async function () {
+    if (!validate()) {
+      showToast('Uzupełnij wszystkie wymagane pola.');
+      var firstErr = document.querySelector('.field-error.show');
+      if (firstErr) {
+        firstErr.closest('.field-block').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
+
+    /* zbierz dane */
+    var issues = Array.from(document.querySelectorAll('input[name="issues"]:checked')).map(function(c) { return c.value; });
+
+    var formData = {
+      full_name:         $('full_name').value.trim(),
+      address:           $('address').value.trim(),
+      email:             $('email').value.trim(),
+      insurer:           $('insurer').value.trim(),
+      case_number:       $('case_number').value.trim(),
+      decision_date:     $('decision_date').value,
+      payout_amount:     $('payout_amount').value,
+      expected_amount:   $('expected_amount').value,
+      issues:            issues,
+      other_description: $('issue_other').checked ? $('other_description').value.trim() : '',
+    };
+
+    /* loading state — przycisk */
+    var btn = $('submitBtn');
+    btn.style.pointerEvents = 'none';
+    btn.innerHTML = '<span>Generowanie\u2026</span>';
+    btn.style.opacity = '0.75';
+
+    /* redirect na stronę ładowania — generowanie.html obsłuży animację */
+    try {
+      sessionStorage.setItem('formularz_dane', JSON.stringify(formData));
+    } catch(e) {}
+
+    window.location.href = '/generowanie.html';
+  });
+
+})();
+</script>
+</body>
+</html>

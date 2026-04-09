@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bezpłatna ocena sprawy — OC Weryfikator</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:     #0A0A0B;
+  --ink2:    #111114;
+  --ink3:    #18181C;
+  --ink4:    #1E1E23;
+  --gold:    #C9A84C;
+  --gold2:   #E2C07A;
+  --gold3:   #F5E4B8;
+  --cream:   #FAF7F2;
+  --smoke:   #F0EDE8;
+  --mist:    #9C9890;
+  --ash:     #5C5955;
+  --border:  rgba(201,168,76,0.18);
+  --border2: rgba(201,168,76,0.08);
+  --border3: rgba(201,168,76,0.32);
+  --red:     #E05252;
+  --red-bg:  rgba(224,82,82,0.08);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--ink);
+  color: var(--cream);
+  line-height: 1.7;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.028;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  padding: 1.3rem 3rem;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(10,10,11,0.88);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border2);
+}
+
+.logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem; font-weight: 600;
+  color: var(--gold2); letter-spacing: 0.04em;
+  text-transform: uppercase; text-decoration: none;
+}
+.logo sup {
+  font-family: 'Outfit', sans-serif; font-size: 0.5rem;
+  font-weight: 400; color: var(--mist); letter-spacing: 0.12em;
+  vertical-align: super; margin-left: 2px;
+}
+
+.nav-back {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.8rem; font-weight: 400; letter-spacing: 0.08em;
+  color: var(--ash); text-decoration: none; transition: color 0.2s;
+}
+.nav-back:hover { color: var(--mist); }
+.nav-back svg { transition: transform 0.2s; }
+.nav-back:hover svg { transform: translateX(-3px); }
+
+/* ── HERO MINI ── */
+.hero-mini {
+  padding: 9rem 2rem 4rem;
+  text-align: center; position: relative; overflow: hidden;
+}
+.hero-mini-orb {
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 600px; height: 400px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(201,168,76,0.09) 0%, rgba(201,168,76,0.03) 50%, transparent 80%);
+  pointer-events: none;
+}
+.hero-mini-line {
+  position: absolute; top: 0; left: 50%;
+  width: 1px; height: 80px;
+  background: linear-gradient(to bottom, transparent, var(--gold));
+  opacity: 0.3;
+}
+
+.step-pill {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: rgba(201,168,76,0.07); border: 1px solid var(--border);
+  padding: 0.4rem 1.1rem; border-radius: 2px;
+  font-size: 0.72rem; font-weight: 500; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--gold);
+  margin-bottom: 2rem; animation: fadeIn 0.8s ease both;
+}
+.step-pill-dot {
+  width: 5px; height: 5px; border-radius: 50%; background: var(--gold);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.4; transform: scale(0.7); }
+}
+
+.hero-mini h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.7rem, 4vw, 2.8rem); font-weight: 700;
+  color: var(--cream); line-height: 1.15; letter-spacing: -0.01em;
+  max-width: 700px; margin: 0 auto 1.1rem;
+  animation: fadeUp 0.8s cubic-bezier(.22,.68,0,1.2) 0.1s both;
+}
+.hero-mini h1 em { font-style: italic; color: var(--gold2); }
+
+.hero-mini-sub {
+  font-size: 1rem; color: var(--mist); font-weight: 300;
+  max-width: 500px; margin: 0 auto 2.2rem; line-height: 1.75;
+  animation: fadeUp 0.8s cubic-bezier(.22,.68,0,1.2) 0.2s both;
+}
+
+.trust-badges {
+  display: flex; align-items: center; justify-content: center;
+  gap: 1.8rem; flex-wrap: wrap;
+  animation: fadeUp 0.8s cubic-bezier(.22,.68,0,1.2) 0.3s both;
+}
+.trust-badge {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 0.78rem; font-weight: 400; letter-spacing: 0.04em; color: var(--ash);
+}
+.trust-badge-dot {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--gold); opacity: 0.55; flex-shrink: 0;
+}
+
+/* ── PROGRESS ── */
+.progress-wrap {
+  max-width: 600px; margin: 2.5rem auto 0; padding: 0 1.5rem;
+  animation: fadeIn 1s ease 0.4s both;
+}
+.progress-track {
+  height: 2px; background: var(--border2); border-radius: 2px;
+  overflow: hidden; position: relative;
+}
+.progress-fill {
+  position: absolute; top: 0; left: 0; bottom: 0;
+  background: linear-gradient(to right, var(--gold), var(--gold2));
+  border-radius: 2px; transition: width 0.5s cubic-bezier(.22,.68,0,1.2); width: 0%;
+}
+.progress-label {
+  display: flex; justify-content: space-between; margin-top: 0.5rem;
+  font-size: 0.72rem; color: var(--ash); font-weight: 300; letter-spacing: 0.06em;
+}
+
+/* ── FORM CARD ── */
+.form-outer {
+  padding: 3rem 2rem 6rem; display: flex; justify-content: center;
+}
+.form-card {
+  width: 100%; max-width: 600px;
+  background: var(--ink2); border: 1px solid var(--border2); position: relative;
+  animation: fadeUp 0.9s cubic-bezier(.22,.68,0,1.2) 0.25s both;
+}
+.form-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(to right, transparent, var(--gold) 50%, transparent);
+  opacity: 0.45;
+}
+
+/* ── QUESTION BLOCKS ── */
+.q-block {
+  padding: 2.2rem 2.5rem; border-bottom: 1px solid var(--border2);
+  position: relative; transition: background 0.25s;
+}
+.q-block:last-of-type { border-bottom: none; }
+.q-block.active { background: rgba(201,168,76,0.025); }
+
+.q-num {
+  font-size: 0.68rem; font-weight: 500; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--gold); opacity: 0.65;
+  margin-bottom: 0.6rem; display: flex; align-items: center; gap: 8px;
+}
+.q-num::before {
+  content: ''; display: block; width: 16px; height: 1px;
+  background: var(--gold); opacity: 0.5;
+}
+
+.q-label {
+  font-family: 'Playfair Display', serif; font-size: 1.1rem;
+  font-weight: 600; color: var(--cream); line-height: 1.3;
+  margin-bottom: 1.4rem; letter-spacing: -0.005em;
+}
+
+/* ── SELECT ── */
+.select-wrap { position: relative; }
+.select-wrap::after {
+  content: ''; position: absolute; right: 1.1rem; top: 50%;
+  transform: translateY(-50%); width: 0; height: 0;
+  border-left: 5px solid transparent; border-right: 5px solid transparent;
+  border-top: 5px solid var(--mist); pointer-events: none;
+}
+select {
+  width: 100%; padding: 0.95rem 2.8rem 0.95rem 1.2rem;
+  background: var(--ink3); border: 1px solid var(--border2);
+  color: var(--cream); font-family: 'Outfit', sans-serif;
+  font-size: 0.97rem; font-weight: 400; outline: none; border-radius: 2px;
+  appearance: none; -webkit-appearance: none; cursor: pointer;
+  transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
+}
+select:hover { border-color: rgba(201,168,76,0.22); background: var(--ink4); }
+select:focus { border-color: var(--gold); background: var(--ink4); box-shadow: 0 0 0 3px rgba(201,168,76,0.08); }
+select option { background: var(--ink3); color: var(--cream); }
+select.error { border-color: var(--red); box-shadow: 0 0 0 3px var(--red-bg); }
+
+/* ── RADIO LIST (vertical) ── */
+.radio-list { display: flex; flex-direction: column; gap: 0.65rem; }
+.radio-list-item { cursor: pointer; position: relative; display: flex; align-items: center; }
+.radio-list-item input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+.radio-list-face {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  padding: 0.85rem 1.1rem; border: 1px solid var(--border2);
+  background: var(--ink3); border-radius: 2px;
+  transition: border-color 0.22s, background 0.22s;
+}
+.radio-list-item:hover .radio-list-face { border-color: rgba(201,168,76,0.25); background: var(--ink4); }
+.radio-list-item input:checked ~ .radio-list-face { border-color: var(--gold); background: rgba(201,168,76,0.08); }
+.radio-list-dot {
+  flex-shrink: 0; width: 16px; height: 16px;
+  border: 1px solid var(--border2); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color 0.2s;
+}
+.radio-list-dot-inner {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--gold);
+  opacity: 0; transform: scale(0);
+  transition: opacity 0.2s, transform 0.2s cubic-bezier(.22,.68,0,1.4);
+}
+.radio-list-item input:checked ~ .radio-list-face .radio-list-dot { border-color: var(--gold); }
+.radio-list-item input:checked ~ .radio-list-face .radio-list-dot-inner { opacity: 1; transform: scale(1); }
+.radio-list-text { font-size: 0.93rem; color: var(--smoke); font-weight: 300; line-height: 1.4; transition: color 0.2s; }
+.radio-list-item input:checked ~ .radio-list-face .radio-list-text { color: var(--cream); }
+
+/* ── CHECKBOXES ── */
+.check-group { display: flex; flex-direction: column; gap: 0.65rem; }
+.check-item { display: flex; align-items: center; cursor: pointer; position: relative; }
+.check-item input[type="checkbox"] { position: absolute; opacity: 0; width: 0; height: 0; }
+.check-visual {
+  flex-shrink: 0; width: 20px; height: 20px;
+  border: 1px solid var(--border2); background: var(--ink3); border-radius: 2px;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color 0.2s, background 0.2s; margin-right: 14px;
+}
+.check-visual svg { opacity: 0; transform: scale(0.5); transition: opacity 0.18s, transform 0.18s cubic-bezier(.22,.68,0,1.4); }
+.check-item:hover .check-visual { border-color: rgba(201,168,76,0.35); background: var(--ink4); }
+.check-item input:checked ~ .check-visual { border-color: var(--gold); background: rgba(201,168,76,0.12); }
+.check-item input:checked ~ .check-visual svg { opacity: 1; transform: scale(1); }
+.check-text { font-size: 0.93rem; color: var(--smoke); font-weight: 300; line-height: 1.5; transition: color 0.2s; }
+.check-item:hover .check-text { color: var(--cream); }
+.check-item input:checked ~ .check-visual ~ .check-text { color: var(--cream); }
+.check-group.error .check-visual { border-color: rgba(224,82,82,0.4); }
+
+/* ── TEXTAREA ── */
+textarea {
+  width: 100%; padding: 0.95rem 1.2rem;
+  background: var(--ink3); border: 1px solid var(--border2);
+  color: var(--cream); font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem; font-weight: 300; outline: none; border-radius: 2px;
+  resize: vertical; min-height: 110px; line-height: 1.7;
+  transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
+}
+textarea::placeholder { color: var(--ash); font-weight: 300; }
+textarea:hover { border-color: rgba(201,168,76,0.22); background: var(--ink4); }
+textarea:focus { border-color: var(--gold); background: var(--ink4); box-shadow: 0 0 0 3px rgba(201,168,76,0.08); }
+
+/* ── ERRORS ── */
+.field-error {
+  margin-top: 0.55rem; font-size: 0.78rem; color: var(--red); font-weight: 400;
+  display: flex; align-items: center; gap: 6px;
+  opacity: 0; height: 0; overflow: hidden; transition: opacity 0.25s, height 0.25s;
+}
+.field-error.show { opacity: 1; height: 1.4rem; }
+.field-error svg { flex-shrink: 0; }
+
+/* ── SUBMIT AREA ── */
+.submit-area {
+  padding: 2rem 2.5rem 2.5rem; border-top: 1px solid var(--border2); position: relative;
+}
+.submit-area::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(to right, transparent, var(--border) 50%, transparent);
+}
+.btn-submit {
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px;
+  padding: 1.15rem 2rem;
+  background: linear-gradient(135deg, var(--gold) 0%, #B8923A 100%);
+  color: var(--ink); border: none; border-radius: 2px;
+  font-family: 'Outfit', sans-serif; font-size: 0.88rem; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer;
+  position: relative; overflow: hidden;
+  transition: transform 0.22s cubic-bezier(.22,.68,0,1.2), box-shadow 0.22s;
+}
+.btn-submit::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--gold2) 0%, var(--gold) 100%);
+  opacity: 0; transition: opacity 0.25s;
+}
+.btn-submit:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(201,168,76,0.28); }
+.btn-submit:hover::before { opacity: 1; }
+.btn-submit:active { transform: translateY(0); }
+.btn-submit span, .btn-submit-arrow { position: relative; }
+.btn-submit-arrow { font-size: 1.1em; transition: transform 0.22s; position: relative; }
+.btn-submit:hover .btn-submit-arrow { transform: translateX(4px); }
+
+.submit-note {
+  text-align: center; margin-top: 1rem; font-size: 0.76rem;
+  color: var(--ash); font-weight: 300; letter-spacing: 0.04em;
+}
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--ink3); border: 1px solid rgba(224,82,82,0.35); color: var(--red);
+  padding: 0.8rem 1.6rem; font-size: 0.85rem; font-weight: 400; letter-spacing: 0.03em;
+  z-index: 500; opacity: 0; pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s; border-radius: 2px; white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 680px) {
+  nav { padding: 1.1rem 1.2rem; }
+  .hero-mini { padding: 7.5rem 1.2rem 3rem; }
+  .hero-mini h1 { font-size: 1.6rem; }
+  .progress-wrap { padding: 0 1rem; }
+  .form-outer { padding: 2rem 1rem 4rem; }
+  .q-block { padding: 1.8rem 1.4rem; }
+  .submit-area { padding: 1.5rem 1.4rem 2rem; }
+  .trust-badges { gap: 1.1rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="logo">OC Weryfikator<sup>®</sup></a>
+  <a href="index.html" class="nav-back">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <path d="M9 11L5 7l4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    Wróć
+  </a>
+</nav>
+
+<!-- HERO MINI -->
+<div class="hero-mini">
+  <div class="hero-mini-orb"></div>
+  <div class="hero-mini-line"></div>
+
+  <div class="step-pill">
+    <span class="step-pill-dot"></span>
+    Bezpłatna ocena sprawy z OC
+  </div>
+
+  <h1>Sprawdź, czy Twoje odwołanie<br><em>ma szansę powodzenia</em></h1>
+
+  <p class="hero-mini-sub">Odpowiedz na kilka krótkich pytań. Sprawdzimy, czy w Twojej sytuacji odwołanie może mieć sens.</p>
+
+  <div class="trust-badges">
+    <div class="trust-badge"><span class="trust-badge-dot"></span>Zajmuje 2–3 minuty</div>
+    <div class="trust-badge"><span class="trust-badge-dot"></span>Anonimowo</div>
+    <div class="trust-badge"><span class="trust-badge-dot"></span>Bezpłatnie</div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div class="progress-label">
+      <span id="progressText">0 z 9 pytań</span>
+      <span id="progressPct">0%</span>
+    </div>
+  </div>
+</div>
+
+<!-- FORM -->
+<div class="form-outer">
+  <div class="form-card" id="formCard">
+
+    <!-- Q1 -->
+    <div class="q-block active" id="block-1">
+      <div class="q-num">Pytanie 01</div>
+      <div class="q-label">Co zrobił ubezpieczyciel w Twojej sprawie?</div>
+      <div class="select-wrap">
+        <select id="insurer_action" name="insurer_action">
+          <option value="" disabled selected>Wybierz odpowiedź…</option>
+          <option value="refused">Odmówił wypłaty odszkodowania</option>
+          <option value="underpaid">Wypłacił odszkodowanie, ale kwota jest zaniżona</option>
+          <option value="partial">Uznał tylko część szkody</option>
+          <option value="delays">Przeciąga sprawę / brak konkretnej decyzji</option>
+        </select>
+      </div>
+      <div class="field-error" id="err-insurer_action">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><path d="M6 3.5v3M6 8.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Wybierz jedną z opcji.
+      </div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="q-block" id="block-2">
+      <div class="q-num">Pytanie 02</div>
+      <div class="q-label">Czy masz już decyzję lub kosztorys od ubezpieczyciela?</div>
+      <div class="radio-list" id="has_doc_group">
+        <label class="radio-list-item">
+          <input type="radio" name="has_doc" id="has_doc_yes" value="yes">
+          <div class="radio-list-face">
+            <div class="radio-list-dot"><div class="radio-list-dot-inner"></div></div>
+            <span class="radio-list-text">Tak — mam dokument</span>
+          </div>
+        </label>
+        <label class="radio-list-item">
+          <input type="radio" name="has_doc" id="has_doc_partial" value="partial">
+          <div class="radio-list-face">
+            <div class="radio-list-dot"><div class="radio-list-dot-inner"></div></div>
+            <span class="radio-list-text">Tak — ale tylko częściowe info</span>
+          </div>
+        </label>
+        <label class="radio-list-item">
+          <input type="radio" name="has_doc" id="has_doc_no" value="no">
+          <div class="radio-list-face">
+            <div class="radio-list-dot"><div class="radio-list-dot-inner"></div></div>
+            <span class="radio-list-text">Nie — jeszcze nie mam</span>
+          </div>
+        </label>
+      </div>
+      <div class="field-error" id="err-has_doc">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><path d="M6 3.5v3M6 8.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Zaznacz jedną z opcji.
+      </div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="q-block" id="block-3">
+      <div class="q-num">Pytanie 03</div>
+      <div class="q-label">Kiedy otrzymałeś decyzję?</div>
+      <div class="radio-list" id="decision_when_group">
+        <label class="radio-list-item">
+          <input type="radio" name="decision_when" id="dw_7days" value="7days">
+          <div class="radio-list-face">
+            <div class="radio-list-dot"><div class="radio-list-dot-inner"></div></div>
+            <span class="radio-list-text">W ciągu ostatnich 7 dni</span>
+          </div>
+        </label>
+        <label class="radio-list-item">
+          <input type="radio" name="decision_when" id="dw_30days" value="30days">
+          <div class="radio-list-face">
+            <div class="radio-list-dot"><div class="radio-list-dot-inner"></div></div>
+            <span class="radio-list-text">W ciągu 30 dni</span>
+          </div>
+        </label>
+        <label class="radio-list-item">
+          <input type="radio" name="decision_when" id="dw_over30" value="over30">
+          <div class="radio-list-face">
+            <div class="radio-list-dot"><div class="radio-list-dot-inner"></div></div>
+            <span class="radio-list-text">Ponad miesiąc temu</span>
+          </div>
+        </label>
+      </div>
+      <div class="field-error" id="err-decision_when">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><path d="M6 3.5v3M6 8.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Zaznacz jedną z opcji.
+      </div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="q-block" id="block-4">
+      <div class="q-num">Pytanie 04</div>
+      <div class="q-label">Co dokładnie budzi Twoje wątpliwości?</div>
+      <div class="check-group" id="doubts_group">
+        <label class="check-item">
+          <input type="checkbox" name="doubts" id="doubts_prices" value="prices">
+          <span class="check-visual"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="check-text">Zaniżone ceny części / robocizny</span>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" name="doubts" id="doubts_omitted" value="omitted">
+          <span class="check-visual"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="check-text">Pominięte uszkodzenia</span>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" name="doubts" id="doubts_substitutes" value="substitutes">
+          <span class="check-visual"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="check-text">Zastosowanie tanich zamienników</span>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" name="doubts" id="doubts_no_reason" value="no_reason">
+          <span class="check-visual"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="check-text">Odmowa bez jasnego uzasadnienia</span>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" name="doubts" id="doubts_other" value="other">
+          <span class="check-visual"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="check-text">Coś innego</span>
+        </label>
+      </div>
+      <div class="field-error" id="err-doubts">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><path d="M6 3.5v3M6 8.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Wybierz co najmniej jedną odpowiedź.
+      </div>
+    </div>
+
+    <!-- Q5 -->
+    <div class="q-block" id="block-5">
+      <div class="q-num">Pytanie 05</div>
+      <div class="q-label">Czy masz coś, co podważa decyzję ubezpieczyciela?</div>
+      <div class="check-group" id="evidence_group">
+        <label class="check-item">
+          <input type="checkbox" name="evidence" id="evidence_photos" value="photos">
+          <span class="check-visual"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="check-text">Zdjęcia szkody</span>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" name="evidence" id="evidence_estimate" value="estimate">
+          <span class="check-visual"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="check-text">Własny kosztorys / wycenę</span>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" name="evidence" id="evidence_invoices" value="invoices">
+          <span class="check-visual"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="check-text">Faktury / rachunki</span>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" name="evidence" id="evidence_expert" value="expert">
+          <span class="check-visual"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="check-text">Opinię rzeczoznawcy</span>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" name="evidence" id="evidence_correspondence" value="correspondence">
+          <span class="check-visual"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="check-text">Korespondencję z ubezpieczycielem</span>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" name="evidence" id="evidence_none" value="none">
+          <span class="check-visual"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="check-text">Nic z powyższych</span>
+        </label>
+      </div>
+      <div class="field-error" id="err-evidence">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><path d="M6 3.5v3M6 8.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Wybierz co najmniej jedną odpowiedź.
+      </div>
+    </div>
+
+    <!-- Q6 -->
+    <div class="q-block" id="block-6">
+      <div class="q-num">Pytanie 06</div>
+      <div class="q-label">Jak bardzo zaniżona wydaje się kwota?</div>
+      <div class="radio-list" id="underpaid_feeling_group">
+        <label class="radio-list-item">
+          <input type="radio" name="underpaid_feeling" id="uf_very" value="very">
+          <div class="radio-list-face">
+            <div class="radio-list-dot"><div class="radio-list-dot-inner"></div></div>
+            <span class="radio-list-text">Zdecydowanie za niska</span>
+          </div>
+        </label>
+        <label class="radio-list-item">
+          <input type="radio" name="underpaid_feeling" id="uf_rather" value="rather">
+          <div class="radio-list-face">
+            <div class="radio-list-dot"><div class="radio-list-dot-inner"></div></div>
+            <span class="radio-list-text">Raczej za niska</span>
+          </div>
+        </label>
+        <label class="radio-list-item">
+          <input type="radio" name="underpaid_feeling" id="uf_unsure" value="unsure">
+          <div class="radio-list-face">
+            <div class="radio-list-dot"><div class="radio-list-dot-inner"></div></div>
+            <span class="radio-list-text">Trudno powiedzieć</span>
+          </div>
+        </label>
+        <label class="radio-list-item">
+          <input type="radio" name="underpaid_feeling" id="uf_ok" value="ok">
+          <div class="radio-list-face">
+            <div class="radio-list-dot"><div class="radio-list-dot-inner"></div></div>
+            <span class="radio-list-text">Raczej OK</span>
+          </div>
+        </label>
+      </div>
+      <div class="field-error" id="err-underpaid_feeling">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><path d="M6 3.5v3M6 8.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Zaznacz jedną z opcji.
+      </div>
+    </div>
+
+    <!-- Q7 -->
+    <div class="q-block" id="block-7">
+      <div class="q-num">Pytanie 07</div>
+      <div class="q-label">O jaką kwotę Twoim zdaniem zaniżone jest odszkodowanie?</div>
+      <div class="select-wrap">
+        <select id="amount_diff" name="amount_diff">
+          <option value="" disabled selected>Wybierz przedział…</option>
+          <option value="lt1000">Do 1 000 zł</option>
+          <option value="1000_3000">1 000–3 000 zł</option>
+          <option value="3000_7000">3 000–7 000 zł</option>
+          <option value="gt7000">Ponad 7 000 zł</option>
+          <option value="unknown">Nie wiem</option>
+        </select>
+      </div>
+      <div class="field-error" id="err-amount_diff">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><path d="M6 3.5v3M6 8.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Wybierz jedną z opcji.
+      </div>
+    </div>
+
+    <!-- Q8 -->
+    <div class="q-block" id="block-8">
+      <div class="q-num">Pytanie 08</div>
+      <div class="q-label">Czy próbowałeś już się odwołać?</div>
+      <div class="radio-list" id="appealed_group">
+        <label class="radio-list-item">
+          <input type="radio" name="appealed" id="appealed_no" value="no">
+          <div class="radio-list-face">
+            <div class="radio-list-dot"><div class="radio-list-dot-inner"></div></div>
+            <span class="radio-list-text">Nie</span>
+          </div>
+        </label>
+        <label class="radio-list-item">
+          <input type="radio" name="appealed" id="appealed_self" value="self">
+          <div class="radio-list-face">
+            <div class="radio-list-dot"><div class="radio-list-dot-inner"></div></div>
+            <span class="radio-list-text">Tak — samodzielnie</span>
+          </div>
+        </label>
+        <label class="radio-list-item">
+          <input type="radio" name="appealed" id="appealed_help" value="help">
+          <div class="radio-list-face">
+            <div class="radio-list-dot"><div class="radio-list-dot-inner"></div></div>
+            <span class="radio-list-text">Tak — z pomocą kogoś</span>
+          </div>
+        </label>
+      </div>
+      <div class="field-error" id="err-appealed">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><path d="M6 3.5v3M6 8.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Zaznacz jedną z opcji.
+      </div>
+    </div>
+
+    <!-- Q9 -->
+    <div class="q-block" id="block-9">
+      <div class="q-num">Pytanie 09</div>
+      <div class="q-label">Opisz krótko sytuację</div>
+      <textarea
+        id="description"
+        name="description"
+        placeholder="Co się stało, jaką dostałeś decyzję i dlaczego się z nią nie zgadzasz?"
+        rows="5"
+      ></textarea>
+      <div class="field-error" id="err-description">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><path d="M6 3.5v3M6 8.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Napisz kilka słów o swojej sytuacji.
+      </div>
+    </div>
+
+    <!-- SUBMIT -->
+    <div class="submit-area">
+      <button class="btn-submit" id="submitBtn" type="button">
+        <span>Sprawdź wynik</span>
+        <span class="btn-submit-arrow">→</span>
+      </button>
+      <p class="submit-note">Bez rejestracji · Bez danych osobowych · Za darmo</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">Uzupełnij wszystkie pola, aby przejść dalej.</div>
+
+<script>
+(function () {
+  'use strict';
+
+  const TOTAL = 9;
+  const $ = id => document.getElementById(id);
+  function getVal(id)     { const el = $(id); return el ? el.value.trim() : ''; }
+  function getRadio(name) { const el = document.querySelector('input[name="' + name + '"]:checked'); return el ? el.value : ''; }
+  function getChecked(name) { return Array.from(document.querySelectorAll('input[name="' + name + '"]:checked')).map(c => c.value); }
+
+  /* ── PROGRESS ── */
+  function updateProgress() {
+    let filled = 0;
+    if (getVal('insurer_action'))          filled++;
+    if (getRadio('has_doc'))               filled++;
+    if (getChecked('doubts').length > 0)   filled++;
+    if (getChecked('evidence').length > 0) filled++;
+    if (getRadio('underpaid_feeling'))     filled++;
+    if (getVal('amount_diff'))             filled++;
+    if (getRadio('appealed'))              filled++;
+    if (getRadio('decision_when'))         filled++;
+    if (getVal('description').length > 0)  filled++;
+
+    const pct = Math.round((filled / TOTAL) * 100);
+    $('progressFill').style.width = pct + '%';
+    $('progressText').textContent  = filled + ' z ' + TOTAL + ' pytań';
+    $('progressPct').textContent   = pct + '%';
+
+    document.querySelectorAll('.q-block').forEach(b => b.classList.remove('active'));
+    if (filled < TOTAL) {
+      const next = $('block-' + (filled + 1));
+      if (next) next.classList.add('active');
+    }
+  }
+
+  $('insurer_action').addEventListener('change', updateProgress);
+  $('amount_diff').addEventListener('change', updateProgress);
+  $('description').addEventListener('input', updateProgress);
+  ['has_doc','underpaid_feeling','appealed','decision_when'].forEach(function(name) {
+    document.querySelectorAll('input[name="' + name + '"]').forEach(function(r) { r.addEventListener('change', updateProgress); });
+  });
+  ['doubts','evidence'].forEach(function(name) {
+    document.querySelectorAll('input[name="' + name + '"]').forEach(function(cb) { cb.addEventListener('change', updateProgress); });
+  });
+
+  /* ── ERROR HELPERS ── */
+  function showErr(id) { var el = $(id); if (el) el.classList.add('show'); }
+  function hideErr(id) { var el = $(id); if (el) el.classList.remove('show'); }
+
+  $('insurer_action').addEventListener('change', function() { if (getVal('insurer_action')) { hideErr('err-insurer_action'); this.classList.remove('error'); } });
+  $('amount_diff').addEventListener('change',    function() { if (getVal('amount_diff'))    { hideErr('err-amount_diff'); this.classList.remove('error'); } });
+  $('description').addEventListener('input',     function() { if (getVal('description').length > 2) hideErr('err-description'); });
+  ['has_doc','underpaid_feeling','appealed','decision_when'].forEach(function(name) {
+    document.querySelectorAll('input[name="' + name + '"]').forEach(function(r) {
+      r.addEventListener('change', function() { hideErr('err-' + name); });
+    });
+  });
+  ['doubts','evidence'].forEach(function(name) {
+    document.querySelectorAll('input[name="' + name + '"]').forEach(function(cb) {
+      cb.addEventListener('change', function() { if (getChecked(name).length > 0) hideErr('err-' + name); });
+    });
+  });
+
+  /* ── TOAST ── */
+  var toastTimer;
+  function showToast(msg) {
+    var t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function() { t.classList.remove('show'); }, 3200);
+  }
+
+  /* ── VALIDATION ── */
+  function validate() {
+    var ok = true;
+
+    if (!getVal('insurer_action')) { showErr('err-insurer_action'); $('insurer_action').classList.add('error'); ok = false; }
+    else { hideErr('err-insurer_action'); $('insurer_action').classList.remove('error'); }
+
+    if (!getRadio('has_doc')) { showErr('err-has_doc'); ok = false; }
+    else { hideErr('err-has_doc'); }
+
+    if (getChecked('doubts').length === 0) { showErr('err-doubts'); ok = false; }
+    else { hideErr('err-doubts'); }
+
+    if (getChecked('evidence').length === 0) { showErr('err-evidence'); ok = false; }
+    else { hideErr('err-evidence'); }
+
+    if (!getRadio('underpaid_feeling')) { showErr('err-underpaid_feeling'); ok = false; }
+    else { hideErr('err-underpaid_feeling'); }
+
+    if (!getVal('amount_diff')) { showErr('err-amount_diff'); $('amount_diff').classList.add('error'); ok = false; }
+    else { hideErr('err-amount_diff'); $('amount_diff').classList.remove('error'); }
+
+    if (!getRadio('appealed')) { showErr('err-appealed'); ok = false; }
+    else { hideErr('err-appealed'); }
+
+    if (!getRadio('decision_when')) { showErr('err-decision_when'); ok = false; }
+    else { hideErr('err-decision_when'); }
+
+    if (getVal('description').length < 3) { showErr('err-description'); ok = false; }
+    else { hideErr('err-description'); }
+
+    return ok;
+  }
+
+  /* ── SCORING ── */
+  function calcScore(data) {
+    var score = 0;
+    var reasons = [];
+
+    if (data.insurer_action === 'refused') { score += 3; reasons.push('ubezpieczyciel całkowicie odmówił wypłaty odszkodowania'); }
+    else if (data.insurer_action === 'underpaid') { score += 3; reasons.push('wypłacona kwota jest zdaniem klienta zaniżona'); }
+    else if (data.insurer_action === 'partial') { score += 2; reasons.push('ubezpieczyciel uznał tylko część szkody'); }
+    else if (data.insurer_action === 'delays') { score += 1; reasons.push('ubezpieczyciel przeciąga sprawę bez konkretnej decyzji'); }
+
+    if (data.has_doc === 'yes') { score += 2; reasons.push('klient posiada decyzję lub kosztorys ubezpieczyciela'); }
+    else if (data.has_doc === 'partial') { score += 1; }
+
+    var strongDoubts = ['prices','omitted','substitutes','no_reason'];
+    var matchedDoubts = data.doubts.filter(function(d) { return strongDoubts.indexOf(d) !== -1; });
+    if (matchedDoubts.length >= 2) { score += 3; reasons.push('wskazano kilka konkretnych zastrzeżeń co do kosztorysu'); }
+    else if (matchedDoubts.length === 1) { score += 2; reasons.push('wskazano konkretne zastrzeżenie co do kosztorysu'); }
+    else if (data.doubts.indexOf('other') !== -1) { score += 1; }
+
+    var strongEvidence = ['estimate','expert','invoices'];
+    var hasStrong = data.evidence.some(function(e) { return strongEvidence.indexOf(e) !== -1; });
+    if (hasStrong) { score += 3; reasons.push('klient dysponuje materiałem mogącym podważyć decyzję ubezpieczyciela'); }
+    else if (data.evidence.indexOf('photos') !== -1 || data.evidence.indexOf('correspondence') !== -1) { score += 1; reasons.push('klient posiada dokumentację fotograficzną lub korespondencję'); }
+
+    if (data.underpaid_feeling === 'very') { score += 2; reasons.push('kwota wydaje się zdecydowanie za niska'); }
+    else if (data.underpaid_feeling === 'rather') { score += 1; }
+    else if (data.underpaid_feeling === 'ok') { score -= 1; }
+
+    if (data.amount_diff === 'gt7000') { score += 3; reasons.push('szacowana różnica przekracza 7 000 zł'); }
+    else if (data.amount_diff === '3000_7000') { score += 2; reasons.push('szacowana różnica wynosi 3 000–7 000 zł'); }
+    else if (data.amount_diff === '1000_3000') { score += 1; }
+
+    if (data.appealed === 'no') { score += 1; }
+
+    if (data.decision_when === '7days' || data.decision_when === '30days') { score += 1; reasons.push('decyzja jest świeża — termin na odwołanie jest aktualny'); }
+
+    score = Math.max(0, score);
+    var resultKey = score >= 8 ? 'strong' : score >= 4 ? 'medium' : 'low';
+    return { score: score, resultKey: resultKey, reasons: reasons };
+  }
+
+  /* ── SUBMIT ── */
+  $('submitBtn').addEventListener('click', function () {
+    if (!validate()) {
+      showToast('Uzupełnij wszystkie pola, aby przejść dalej.');
+      var firstErr = document.querySelector('.field-error.show');
+      if (firstErr) {
+        var block = firstErr.closest('.q-block');
+        if (block) block.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
+
+    var data = {
+      insurer_action:    getVal('insurer_action'),
+      has_doc:           getRadio('has_doc'),
+      doubts:            getChecked('doubts'),
+      evidence:          getChecked('evidence'),
+      underpaid_feeling: getRadio('underpaid_feeling'),
+      amount_diff:       getVal('amount_diff'),
+      appealed:          getRadio('appealed'),
+      decision_when:     getRadio('decision_when'),
+      description:       getVal('description'),
+    };
+
+    var result = calcScore(data);
+    var wynikObj = { score: result.score, resultKey: result.resultKey, reasons: result.reasons };
+    var daneObj  = Object.assign({}, data, { timestamp: Date.now() });
+
+    try {
+      localStorage.setItem('resultKey',   result.resultKey);
+      localStorage.setItem('ocena_wynik', JSON.stringify(wynikObj));
+      localStorage.setItem('ocena_dane',  JSON.stringify(daneObj));
+    } catch(e) {}
+
+    var payload = btoa(encodeURIComponent(JSON.stringify({ resultKey: result.resultKey, wynik: wynikObj, dane: daneObj })));
+    var url = 'wynik.html?d=' + payload;
+
+    var btn = $('submitBtn');
+    btn.style.pointerEvents = 'none';
+    btn.innerHTML = '<span>Obliczam wynik\u2026</span>';
+    btn.style.opacity = '0.75';
+
+    setTimeout(function() { window.location.href = url; }, 650);
+  });
+
+  updateProgress();
+
+})();
+</script>
+</body>
+</html>
